@@ -173,7 +173,7 @@
         that.selectC = e.class_id;
         postId.append('class_id',e.class_id)
         $.ajax({
-          url:GLOBAL.baseURL+'/user/checkAllT',
+          url:GLOBAL.baseURL+'/user/checkAllT', 
           type:'post',
           xhrFields:{
             withCredentials:false
