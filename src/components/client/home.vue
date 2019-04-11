@@ -29,7 +29,7 @@
           </el-menu-item>
           <el-menu-item index="/home/personalCenter">
             <i class="el-icon-setting"></i>
-            <span slot="title">管理员管理</span>
+            <span slot="title">账号信息</span>
           </el-menu-item>
         </el-menu>
       </div>

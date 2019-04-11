@@ -2,14 +2,6 @@
   <div id="goods">
     <Title :banner="banner"></Title>
     <div class="content3">
-      <!-- <div class="headBar clearfix">
-        <el-input placeholder="请输入内容" v-model="searchValue" style="float:left;width:500px"  class="input-with-select" clearable>
-          <el-select v-model="select" slot="prepend" placeholder="请选择">
-            <el-option label="年级" value="1"></el-option>
-          </el-select>
-          <el-button slot="append" icon="el-icon-check" @click="search"></el-button>
-        </el-input>
-      </div> -->
       <div class="fansil" style="height:530px;">
         <el-table
           :data="tableData"
@@ -44,30 +36,44 @@
             label="操作"
             width="300">
             <template slot-scope="scope">
-              <el-button type="text" @click="handleClick(scope.row)">设置班主任</el-button>
-              <!-- <el-button @click="handleClick(scope.row)" type="text" size="big">设置班主任</el-button> -->
+              <el-button type="text" @click="handleClick(scope.row)">设置班级</el-button>
+              <el-button @click="setSubject(scope.row)" type="text" size="big">设置学科</el-button>
               <el-button @click="delectC(scope.row)" type="text" size="big">删除班级</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
     </div>
-    <el-dialog title="设置班主任" :visible.sync="dialogFormVisible">
+    <el-dialog title="设置班级" :visible.sync="dialogFormVisible">
       <el-form :model="selectwc">
-        <el-form-item label="该班级的教师" width="120px">
-          <el-select v-model="selectwc.value" placeholder="请选择教师">
-            <el-option v-for="item in selectList"
-            :label="item.user_name"
-            :key="item.user_id"
-            :value="item.user_id"
-            >
-            </el-option>
-          </el-select>
+        <el-form-item label="可选班级：" :label-width="label_width">
+          <el-checkbox-group v-model="selectClass" :min="1">
+            <el-checkbox v-for="item in selectList"
+            :label="item.value"
+            :key="item.key"
+            :value="item.key"
+            ></el-checkbox>
+          </el-checkbox-group>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="sureChange">确 定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog title="设置学科" :visible.sync="subjectShow">
+      <el-form :model="selectwc">
+        <el-form-item label="可选班级：" :label-width="label_width">
+          <el-radio-group v-model="selectSubject">
+            <el-radio-button label="语文" value="33018ef1b3b74a18b6d9f94bff995d79"></el-radio-button>
+            <el-radio-button label="数学" value="cd84a79d6ee04e4d9630731b25b589d0"></el-radio-button>
+            <el-radio-button label="英语" value="79bed2b0e57c4f7f8e71b9817f03e3b9"></el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="subjectShow = false">取 消</el-button>
+        <el-button type="primary" @click="sureSubject">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -80,71 +86,47 @@
   export default{
     data(){
       return{
+        subjectShow:false,
         dialogFormVisible:false,
         banner:'教师管理',
         searchValue:'',
         tableData:[],
         isShow:false,
         url:'',
-        selectC:'',
+        selectT:'',
+        selectSubject:'',
         selectList:[],
-        selectwc:{
-          value:''
-        },
+        selectwc:{value:''},
+        selectClass:[],
+        returnClass:[],
+        label_width:'180px'
       }
     },
     methods:{
-      delectC(e){
+      setSubject(e){
         var that = this;
-        console.log(e.class_id)
-        that.$confirm('此操作将永久删除该班级, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          var postId = new FormData()
-          postId.append('class_id',e.class_id)
-          $.ajax({
-            url:GLOBAL.baseURL+'/class/delect',
-            type:'post',
-            xhrFields:{
-              withCredentials:false
-            },
-            data:postId,
-            contentType:false,
-            processData:false,
-            success:function(data){
-              console.log(data)
-              that.$message({
-                type: 'success',
-                message: '删除成功!'
-              });
-              that.$router.go(0);
-            },
-            error:function(){
-              console.log("发生异常");
-              self.$message({
-                showClose: true,
-                message: '连接服务器失败！',
-                type: 'error'
-              });
-            }
-          })
-        }).catch(() => {
-          that.$message({
-            type: 'info',
-            message: '已取消删除'
-          });          
-        });
+        that.selectT = e.user_id;
+      },
+      sureSubject(){
+        var that = this;
+        console.log(that.selectSubject)
       },
       sureChange(){
         var that = this;
-        console.log(that.selectwc.value)
+        var tempxixixi = that.returnClass;
+        tempxixixi = [];
+        for(var i = 0;i<that.selectClass.length;i++){
+          for(var j = 0;j<that.selectList.length;j++){
+            if(that.selectClass[i]==that.selectList[j].value){
+              tempxixixi.push(that.selectList[j].key);
+            }
+          }
+        }
         var postId = new FormData()
-        postId.append('class_id',that.selectC)
-        postId.append('user_id',that.selectwc.value)
+        postId.append('teacher_class',tempxixixi)
+        postId.append('user_id',that.selectT)
         $.ajax({
-          url:GLOBAL.baseURL+'/class/setHead',
+          url:GLOBAL.baseURL+'/class/chooses',
           type:'post',
           xhrFields:{
             withCredentials:false
@@ -169,16 +151,15 @@
       },
       handleClick(e){
         var that = this;
-        var postId = new FormData()
-        that.selectC = e.class_id;
-        postId.append('class_id',e.class_id)
+        that.selectT = e.user_id;
+        that.selectClass = [];
         $.ajax({
-          url:GLOBAL.baseURL+'/user/checkAllT', 
+          url:GLOBAL.baseURL+'/class/haodeba', 
           type:'post',
           xhrFields:{
             withCredentials:false
           },
-          data:postId,
+          data:'',
           contentType:false,
           processData:false,
           success:function(data){
@@ -208,63 +189,6 @@
           contentType:false,
           processData:false,
           success:function(data){
-            console.log(data)
-            self.tableData = data
-            console.log(self.tableData)
-          },
-          error:function(){
-            console.log("发生异常");
-            self.$message({
-              showClose: true,
-              message: '连接服务器失败！',
-              type: 'error'
-            });
-          }
-        })
-      },
-      setHead(){
-        var postId = new FormData()
-        postId.append('num',this.searchValue)
-        var self = this
-        $.ajax({
-          url:GLOBAL.baseURL+'/class/classManager',
-          type:'post',
-          xhrFields:{
-            withCredentials:false
-          },
-          data:postId,
-          contentType:false,
-          processData:false,
-          success:function(data){
-            console.log(data)
-            self.tableData = data
-            console.log(self.tableData)
-          },
-          error:function(){
-            console.log("发生异常");
-            self.$message({
-              showClose: true,
-              message: '连接服务器失败！',
-              type: 'error'
-            });
-          }
-        })
-      },
-      checkT(class_id){
-        var postId = new FormData()
-        postId.append('class_id',class_id)
-        var self = this
-        $.ajax({
-          url:GLOBAL.baseURL+'/class/classManager',
-          type:'post',
-          xhrFields:{
-            withCredentials:false
-          },
-          data:postId,
-          contentType:false,
-          processData:false,
-          success:function(data){
-            console.log(data)
             self.tableData = data
             console.log(self.tableData)
           },
