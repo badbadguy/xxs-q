@@ -3,57 +3,67 @@
     <Title :banner="banner"></Title>
 		<div class="content3">
 			<div class="headBar clearfix">
-			 	<el-input placeholder="请输入内容" v-model="searchValue" style="float:left;width:500px"  class="input-with-select" clearable>
+			 	<!-- <el-input placeholder="请输入内容" v-model="searchValue" style="float:left;width:500px"  class="input-with-select" clearable>
 			 		<el-select v-model="select" slot="prepend" placeholder="请选择">
 				      <el-option label="题目id" value="1"></el-option>
 				    </el-select>
 				    <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
-				</el-input>
+				</el-input> -->
 				<el-button type="primary" style="float:left;margin-left:80px" @click="add">新增题目</el-button>
 			</div>
 			<div style="height:530px;">
 				<el-table
-			      :data="tableData"
+			      :data="Qtitle"
 			      stripe
 			      style="width: 100%">
 			      <el-table-column
 			        fixed
-			        prop="id"
-			        label="题目ID"
+			        prop="type"
+			        label="题目类型"
 			        width="80">
 			      </el-table-column>
 			      <el-table-column
-			        prop="title"
+			        prop="question_title"
 			        label="题目"
 			        width="220">
 			      </el-table-column>
+						<el-table-column label="图片" width="150" align="center">
+							<template slot-scope="scope">
+								<img :src="scope.row.question_image||defaultImg" style="width: 50px;height:50px;" @click="openImg(scope.row.question_image)">
+							</template>
+						</el-table-column>
 			      <el-table-column
-			        prop="ans1"
+			        prop="question_answer1"
 			        label="答案A"
 			        width="120">
 			      </el-table-column>
 			      <el-table-column
-			        prop="ans2"
+			        prop="question_answer2"
 			        label="答案B"
 			        width="120">
 			      </el-table-column>
 			      <el-table-column
-			        prop="ans3"
+			        prop="question_answer3"
 			        label="答案C"
 			        width="120">
 			      </el-table-column>
 			      <el-table-column
-			        prop="ans4"
+			        prop="question_answer4"
 			        label="答案D"
 			        width="120">
 			      </el-table-column>
 			      <el-table-column
-              prop="rans"
+              prop="question_answerr"
+              label="正确选项"
+			        width="120">
+            </el-table-column>
+						<el-table-column
+              prop="question_answers"
               label="正确答案"
 			        width="120">
             </el-table-column>
             <el-table-column
-              prop="expl"
+              prop="question_remark"
               label="讲解"
               width="180">
             </el-table-column>
@@ -86,12 +96,18 @@
 				  :total="pageCount">
 				</el-pagination>
 			</div>
+			<el-dialog width="400px" :visible.sync="imgVisible" class="img-dialog">
+				<el-card :body-style="{ padding: '0px' }">
+					<img :src="dialogImgUrl" width="100%" height="100%">
+				</el-card>
+			</el-dialog>
 		</div>
 	</div>
 </template>
 
 <script>
-  import Title from '../common/title.vue'
+	import Title from '../common/title.vue'
+	import GLOBAL from '../../common/xxx'	
 	import $ from 'jquery'
 	export default{
 		data(){
@@ -106,54 +122,66 @@
 				url:'',
 				select:'',
 				typeList:[],
+	
+				Qtitle:[],
+				defaultImg:'http://47.106.213.157:80/group1/M00/00/01/rBIH9lyx_TCAHTGxAAAGePDeGP0541.jpg',
+				imgVisible: false,
+				dialogImgUrl:''
 			}
 		},
 		methods:{
-			search(){
-				if(this.searchValue != ''){
-					if(this.select == 1){
-						this.pageNum = 1
-						this.searchById()
-					}
+			// search(){
+			// 	if(this.searchValue != ''){
+			// 		if(this.select == 1){
+			// 			this.pageNum = 1
+			// 			this.searchById()
+			// 		}
+			// 	}
+			// 	else{
+			// 		this.select = ''
+			// 		this.pageNum = 1
+			// 		this.getExamsList()
+			// 	}
+			// },
+			// searchById(){
+			//   var postId = new FormData()
+			// 	postId.append('eId',this.searchValue)
+      //   var self = this
+      //   $.ajax({
+      //     url:'http://47.106.213.157:8180/binyuantest-manager-web/exam/id',
+      //     type:'post',
+      //     xhrFields:{
+      //       withCredentials:true
+      //     },
+      //     data:postId,
+      //     contentType:false,
+      //     processData:false,
+      //     success:function(data){
+      //       console.log('查询成功1')
+      //       self.tableData = []
+      //       self.setList2(data,self.typeList)
+      //       self.$message({
+      //         showClose: true,
+      //         message: '查询成功！',
+      //         type: 'success'
+      //       });
+      //     },
+      //     error:function(){
+      //       console.log("发生异常");
+      //       self.$message({
+      //         showClose: true,
+      //         message: '查询失败！',
+      //         type: 'error'
+      //       });
+      //     }
+      //   })
+			// },
+				// 展示图片
+			openImg(url) {
+				if (url) {
+					this.imgVisible = true
+					this.dialogImgUrl = url
 				}
-				else{
-					this.select = ''
-					this.pageNum = 1
-					this.getExamsList()
-				}
-			},
-			searchById(){
-			  var postId = new FormData()
-				postId.append('eId',this.searchValue)
-        var self = this
-        $.ajax({
-          url:'http://47.106.213.157:8180/binyuantest-manager-web/exam/id',
-          type:'post',
-          xhrFields:{
-            withCredentials:true
-          },
-          data:postId,
-          contentType:false,
-          processData:false,
-          success:function(data){
-            console.log('查询成功1')
-            self.tableData = []
-            self.setList2(data,self.typeList)
-            self.$message({
-              showClose: true,
-              message: '查询成功！',
-              type: 'success'
-            });
-          },
-          error:function(){
-            console.log("发生异常");
-            self.$message({
-              showClose: true,
-              message: '查询失败！',
-              type: 'error'
-            });
-          }
-        })
 			},
 			add(){
 				this.$router.push({
@@ -162,12 +190,37 @@
 				})
 			},
 			handleUpdate(id){
-        var temp = id.id
-        sessionStorage.setItem("examId",temp)
-				this.$router.push({
-					path: '/teacher/updateExams',
-					replace: false
-				})
+				console.log(id)
+        var temp = id.question_id
+				sessionStorage.setItem("question_id",temp)
+				switch (id.type) {
+					case "单选题":
+						this.$router.push({
+							path: '/teacher/updateExams',
+							replace: false
+						})
+						break;
+					case "语音题":
+						this.$router.push({
+							path: '/teacher/updateExams1',
+							replace: false
+						})
+						break;
+					case "填空题":
+						this.$router.push({
+							path: '/teacher/updateExams2',
+							replace: false
+						})
+						break;
+					case "应用题":
+						this.$router.push({
+							path: '/teacher/updateExams3',
+							replace: false
+						})
+						break;
+					default:
+						break;
+				}
 			},
 			handleDelete(id){
 				var postId = new FormData()
@@ -247,37 +300,33 @@
         })
       },
 			getExamsList(){
+				var that = this;
 				var postPage = new FormData()
-				postPage.append('page',this.pageNum)
-				postPage.append('rows',this.pageSize)
-
+				postPage.append('subject_id',sessionStorage.getItem("teacher_subject"))
 				var self = this
-            	$.ajax({  
-		            url:'http://47.106.213.157:8180/binyuantest-manager-web/exam/all',
-                    type:'post',
-                    xhrFields:{
-                        withCredentials:true
-                    },
-                    data:postPage,
-                    contentType:false,
-                    processData:false,
-		            success:function(data){
-                  console.log('查询成功2',data)
-                  self.tableData = []
-                  self.setList(data,self.typeList)
-                  self.pageCount = data.pageSize * 10
-                  console.log(data)
-                  console.log("上一行getExamsList success")
-		            },  
-		            error:function(){  
-		                console.log("发生异常");  
-		                self.$message({
-				          showClose: true,
-				          message: '获取列表失败！',
-				          type: 'error'
-				        });
-		            }  
-		        }) 
+        $.ajax({
+		      url:GLOBAL.baseURL+'/question/select',
+          type:'post',
+          xhrFields:{
+              withCredentials:false
+          },
+          data:postPage,
+          contentType:false,
+          processData:false,
+		      success:function(data){
+						console.log('查询成功2',data)
+						that.Qtitle = data.resultList;
+						console.log('that.Qtitle',that.Qtitle);
+		      },  
+		      error:function(){
+		        console.log("发生异常");  
+		        self.$message({
+							showClose: true,
+							message: '获取列表失败！',
+							type: 'error'
+						});
+		      }
+		    }) 
 			},
 		},
     components:{
@@ -339,5 +388,8 @@
 	top: 50%;
 	left: 50%;
 	margin: -215px 0 0 -215px;
+}
+.img-dialog {
+  padding: 0!important;
 }
 </style>

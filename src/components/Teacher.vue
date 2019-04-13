@@ -42,6 +42,7 @@
 
 <script>
   import $ from 'jquery'
+import GLOBAL from '../common/xxx'
   export default{
     data(){
       return{
@@ -56,6 +57,37 @@
           replace: false
         })
       },
+      checkSubject(){
+        var that = this;
+        var id = sessionStorage.getItem("id");
+        console.log("id:",id)
+        var postId = new FormData()
+        postId.append('user_id',id)
+        $.ajax({
+          url:GLOBAL.baseURL+'/user/selectAll',
+          type:'post',
+          xhrFields:{
+            withCredentials:false
+          },
+          data:postId,
+          contentType:false,
+          processData:false,
+          success:function(res){
+            sessionStorage.setItem("teacher_subject",res.returnMap.teacher_subject)
+            console.log("查看返回",res.returnMap.teacher_subject)
+            console.log("查看存储",sessionStorage.getItem("teacher_subject"))
+          },
+          error:function(){
+            console.log("发生异常");
+            that.$message({
+              showClose: true,
+              message: '服务器出现错误！',
+              type: 'error'
+            });
+            that.writeOff();
+          }
+        })
+      }
     },
     computed:{
       onRoutes(){
@@ -69,8 +101,46 @@
       }
     },
     mounted(){
-      sessionStorage.flag = 1
-      this.username = sessionStorage.getItem("username")
+      var that = this;
+      sessionStorage.flag = 1;
+      var formdata = new FormData();
+      formdata.append('key',sessionStorage.getItem("key"))
+      $.ajax({
+          url:GLOBAL.baseURL+'/user/getLogin',
+          type:'post',
+          xhrFields:{
+            withCredentials:false
+          },
+          data:formdata,
+          contentType:false,
+          processData:false,
+          success:function(res){
+            console.log(res);
+            if(res.success){
+              that.username = res.user_name;
+              sessionStorage.setItem("id",res.user_id)
+              sessionStorage.setItem("username",res.user_name)
+            }else{
+              that.$message({
+                showClose: true,
+                message: '登录超时！',
+                type: 'error'
+              });
+              that.writeOff();
+            }
+          },
+          error:function(){
+            console.log("发生异常");
+            that.$message({
+              showClose: true,
+              message: '服务器出现错误！',
+              type: 'error'
+            });
+            that.writeOff();
+          }
+        })
+      this.username = sessionStorage.getItem("username");
+      this.checkSubject();
     }
   }
 </script>

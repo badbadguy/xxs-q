@@ -3,13 +3,14 @@ import Router from 'vue-router'
 
 //登陆
 import Login from "@/components/Login"
-//注册
-import Register from "@/components/Register"
 //管理端
 import teacher from "@/components/Teacher"
 import exams from '../components/exammanager/exams.vue'
 import addExams from '../components/exammanager/addExams.vue'
 import updateExams from '../components/exammanager/updateExams.vue'
+import updateExams1 from '../components/exammanager/updateExams1.vue'
+import updateExams2 from '../components/exammanager/updateExams2.vue'
+import updateExams3 from '../components/exammanager/updateExams3.vue'
 import userManage from '../components/userManage.vue'
 import hisManage from '../components/hisManage.vue'
 
@@ -35,11 +36,6 @@ export default new Router({
       component:Login
     },
     {
-      path:'/register',
-      name:'Register',
-      component:Register
-    },
-    {
       path: '/teacher',
       //name: 'teacher',
       component: teacher,
@@ -62,6 +58,21 @@ export default new Router({
           path: '/teacher/updateExams',
           name: 'updateExams',
           component: updateExams
+        },
+        {
+          path: '/teacher/updateExams1',
+          name: 'updateExams1',
+          component: updateExams1
+        },
+        {
+          path: '/teacher/updateExams2',
+          name: 'updateExams2',
+          component: updateExams2
+        },
+        {
+          path: '/teacher/updateExams3',
+          name: 'updateExams3',
+          component: updateExams3
         },
         {
           path: '/teacher/hisManage',

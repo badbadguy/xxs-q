@@ -17,6 +17,11 @@
             width="200">
           </el-table-column>
           <el-table-column
+            prop="teacher_subject"
+            label="学科"
+            width="100">
+          </el-table-column>
+          <el-table-column
             prop="class"
             label="负责的班级"
             width="400">
@@ -38,7 +43,6 @@
             <template slot-scope="scope">
               <el-button type="text" @click="handleClick(scope.row)">设置班级</el-button>
               <el-button @click="setSubject(scope.row)" type="text" size="big">设置学科</el-button>
-              <el-button @click="delectC(scope.row)" type="text" size="big">删除班级</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -63,7 +67,7 @@
     </el-dialog>
     <el-dialog title="设置学科" :visible.sync="subjectShow">
       <el-form :model="selectwc">
-        <el-form-item label="可选班级：" :label-width="label_width">
+        <el-form-item label="可选学科：" :label-width="label_width">
           <el-radio-group v-model="selectSubject">
             <el-radio-button label="语文" value="33018ef1b3b74a18b6d9f94bff995d79"></el-radio-button>
             <el-radio-button label="数学" value="cd84a79d6ee04e4d9630731b25b589d0"></el-radio-button>
@@ -94,7 +98,8 @@
         isShow:false,
         url:'',
         selectT:'',
-        selectSubject:'',
+        selectSubject:'语文',
+        returnSubject:'',
         selectList:[],
         selectwc:{value:''},
         selectClass:[],
@@ -106,10 +111,48 @@
       setSubject(e){
         var that = this;
         that.selectT = e.user_id;
+        that.selectSubject = '';
+        that.subjectShow = true;
       },
       sureSubject(){
         var that = this;
-        console.log(that.selectSubject)
+        switch(that.selectSubject){
+          case '语文':
+              that.returnSubject = '33018ef1b3b74a18b6d9f94bff995d79';
+              break;
+          case '数学':
+              that.returnSubject = 'cd84a79d6ee04e4d9630731b25b589d0';
+              break;
+          case '英语':
+              that.returnSubject = '79bed2b0e57c4f7f8e71b9817f03e3b9';
+              break;
+        }
+        var postId = new FormData()
+        postId.append('teacher_subject',that.returnSubject)
+        postId.append('user_id',that.selectT)
+        $.ajax({
+          url:GLOBAL.baseURL+'/user/updatet',
+          type:'post',
+          xhrFields:{
+            withCredentials:false
+          },
+          data:postId,
+          contentType:false,
+          processData:false,
+          success:function(data){
+            console.log(data)
+            that.subjectShow = false;
+            that.$router.go(0);
+          },
+          error:function(){
+            console.log("发生异常");
+            self.$message({
+              showClose: true,
+              message: '连接服务器失败！',
+              type: 'error'
+            });
+          }
+        })
       },
       sureChange(){
         var that = this;

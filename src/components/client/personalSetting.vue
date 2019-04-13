@@ -33,6 +33,7 @@
 
 <script>
     import $ from 'jquery'
+import GLOBAL from '../../common/xxx'
     export default {
         data() {
             return {
@@ -58,48 +59,33 @@
             },
             checkPwd(){
               var self = this
+            //   var formdata = new FormData();
+            //   formdata.append('user_id',sessionStorage.getItem("id"));
+            //   formdata.append('oldPassword',self.pwd);
+            //   formdata.append('newPassword',self.npwd);
               $.ajax({
-                url:'http://47.106.213.157:8180/binyuantest-manager-web/user/login0',
+                url:GLOBAL.baseURL+'/user/changePw',
                 type:'post',
                 xhrFields:{
-                  withCredentials:true
+                  withCredentials:false
                 },
                 data:{
-                  uname:sessionStorage.getItem("username"),
-                  pwd:self.pwd,
+                    user_id:sessionStorage.getItem("id"),
+                    oldPassword:self.pwd,
+                    newPassword:self.npwd
                 },
                 success:function(data){
-                  if(data.status == 200){
-                    self.resetPwd()
-                  } else{
-                    alert("旧密码错误！")
-                  }
-                },
-                error:function(res){
-                  console.log("发生异常")
-                  console.log(res)
-                }
-              })
-            },
-            resetPwd(){
-              var self = this
-              $.ajax({
-                url:'http://47.106.213.157:8180/binyuantest-manager-web/user/upd',
-                type:'post',
-                xhrFields:{
-                  withCredentials:true
-                },
-                data:{
-                  pwd:self.npwd,
-                  uid:sessionStorage.getItem("userid"),
-                },
-                success:function(data){
-                  self.loginPwd = ''
-                  self.newLoginPwd = ''
-                  self.$message({
-                    message: '修改成功！',
-                    type: 'success'
-                  });
+                    console.log(data);
+                    self.pwd = ''
+                    self.npwd = ''
+                    if(data.success){
+                        self.$message({
+                            message: '修改成功！',
+                            type: 'success'
+                        });
+                    }else{
+                        self.$message.error(data.message);
+                    }
                 },
                 error:function(res){
                   console.log("发生异常")
@@ -108,25 +94,8 @@
               })
             },
             getInfo(){
-              var self = this
-              $.ajax({
-                url:'http://47.106.213.157:8180/binyuantest-manager-web/user/id',
-                type:'post',
-                xhrFields:{
-                  withCredentials:true
-                },
-                data:{
-                  userId:sessionStorage.getItem("userid"),
-                },
-                success:function(data){
-                  console.log(data.uname)
-                  self.username = data.uname
-                },
-                error:function(res){
-                  console.log("发生异常")
-                  console.log(res)
-                }
-              })
+              var that = this;
+              that.username = sessionStorage.getItem("username");
             },
         },
         mounted() {

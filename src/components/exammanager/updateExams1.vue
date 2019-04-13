@@ -10,16 +10,9 @@
 			</div>
 			<div style="margin-left:90px">
 				<div class="itemBar">
-					<p>题目</p>
+					<p>题目1</p>
 					<el-input v-model="eques" placeholder="请输入题目" style="width:400px;"></el-input>
 				</div>
-				<el-upload
-					list-type="picture-card"
-					action="''"
-					:http-request="upload"
-					:before-upload="beforeAvatarUpload">
-					<i class="el-icon-plus"></i>
-				</el-upload>
         <div class="itemBar">
           <p>答案A</p>
           <el-input v-model="eans1" placeholder="请输入答案的A选项" style="width:400px;"></el-input>
@@ -62,7 +55,6 @@
 
 <script>
 	import $ from 'jquery'
-	import GLOBAL from '../../common/xxx'
 	export default{
 		data(){
 			return{
@@ -72,40 +64,10 @@
         eans3:'',
         eans4:'',
         eques:'',
-				eexp:'',
-				imageUrl:'',
+        eexp:'',
 			}
 		},
 		methods:{
-			// 图片上传前验证
-			beforeAvatarUpload (file) {
-				const isLt2M = file.size / 1024 / 1024 < 2
-				if (!isLt2M) {
-				this.$message.error('上传头像图片大小不能超过 2MB!')
-				}
-				return isLt2M
-			},
-			// 上传图片到OSS 同时派发一个事件给父组件监听
-			upload (item) {
-				console.log("upload",item);
-				// getAliOSSCreds().then(res => { // 向后台发请求 拉取OSS相关配置
-				// let creds = res.body.data
-				// let client = new OSS.Wrapper({
-				// 	region: 'oss-cn-beijing', // 服务器集群地区
-				// 	accessKeyId: creds.accessKeyId, // OSS帐号
-				// 	accessKeySecret: creds.accessKeySecret, // OSS 密码
-				// 	stsToken: creds.securityToken, // 签名token
-				// 	bucket: 'imgXXXX' // 阿里云上存储的 Bucket
-				// })
-				// let key = 'resource/' + localStorage.userId + '/images/' + createId() + '.jpg' // 存储路径，并且给图片改成唯一名字
-				// return client.put(key, item.file) // OSS上传
-				// }).then(res => {
-				// console.log(res.url)
-				// this.$emit('on-success', res.url) // 返回图片的存储路径
-				// }).catch(err => {
-				// console.log(err)
-				// })
-			},
 			back(){
 				this.$router.push({
 					path: '/teacher/exams',
@@ -114,18 +76,18 @@
 			},
 			confirm(){
 				var postExams = new FormData()
-        postExams.append('question_id',sessionStorage.question_id)
-        postExams.append('question_title',this.eques)
-        postExams.append('question_answer1',this.eans1)
-        postExams.append('question_answer2',this.eans2)
-        postExams.append('question_answer3',this.eans3)
-        postExams.append('question_answer4',this.eans4)
-        postExams.append('question_answerr',this.estate)
-        postExams.append('question_remark',this.eexp)
+        postExams.append('eid',sessionStorage.examId)
+        postExams.append('eques',this.eques)
+        postExams.append('eans1',this.eans1)
+        postExams.append('eans2',this.eans2)
+        postExams.append('eans3',this.eans3)
+        postExams.append('eans4',this.eans4)
+        postExams.append('estate',this.estate)
+        postExams.append('eexp',this.eexp)
 
 				var self = this
         $.ajax({
-          url:GLOBAL.baseURL+'/question/update',
+          url:'http://47.106.213.157:8180/binyuantest-manager-web/exam/upd',
           type:'post',
           xhrFields:{
             withCredentials:true
@@ -150,41 +112,40 @@
 			},
 			getExamsInfo(){
 				var postId = new FormData()
-				postId.append('question_id',sessionStorage.getItem("question_id"))
+				postId.append('eId',sessionStorage.getItem("examId"))
 				var self = this
-	      $.ajax({
-		    		url:GLOBAL.baseURL+'/question/select',
-	          type:'post',
-	          xhrFields:{
-	              withCredentials:false
-	          },
-	          data:postId,
-	          contentType:false,
-	          processData:false,
-						success:function(data){
-							console.log('查询成功')
-							console.log(data.resultList[0])
-							self.eques = data.resultList[0].question_title
-							self.eans1 = data.resultList[0].question_answer1
-							self.eans2 = data.resultList[0].question_answer2
-							self.eans3 = data.resultList[0].question_answer3
-							self.eans4 = data.resultList[0].question_answer4
-							self.estate = data.resultList[0].question_answerr
-							self.eexp = data.resultList[0].question_remark
-						},
-						error:function(){
-								console.log("发生异常");
-								self.$message({
-								showClose: true,
-								message: '获取失败！',
-								type: 'error'
-						});
-						}
-			  	})
+	            $.ajax({
+			        url:'http://47.106.213.157:8180/binyuantest-manager-web/exam/id',
+	                type:'post',
+	                xhrFields:{
+	                    withCredentials:true
+	                },
+	                data:postId,
+	                contentType:false,
+	                processData:false,
+			        success:function(data){
+				        console.log('查询成功')
+				        console.log(data)
+                self.eques = data.eques
+                self.eans1 = data.eans1
+                self.eans2 = data.eans2
+                self.eans3 = data.eans3
+                self.eans4 = data.eans4
+                self.estate = data.estate
+                self.eexp = data.eexp
+			    	},
+			        error:function(){
+			            console.log("发生异常");
+			            self.$message({
+					        showClose: true,
+					        message: '获取失败！',
+					        type: 'error'
+					    });
+			        }
+			    })
 			},
 		},
 		mounted(){
-			console.log("qid:",sessionStorage.question_id)
       this.getExamsInfo()
 /*		  alert(sessionStorage.getItem("loginid"))*/
 		}
@@ -307,28 +268,5 @@
 #updateGoods .numFoot{
 	height: 50px;
 	padding: 10px 0 0 85px;
-}
-.avatar-uploader .el-upload {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader .el-upload:hover {
-  border-color: #409EFF;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  line-height: 178px;
-  text-align: center;
-}
-.avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
 }
 </style>

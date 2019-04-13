@@ -16,7 +16,6 @@
         </div>
         <div class = "remFor">
           <el-checkbox v-model = "checked" checked class = "remember">记住密码</el-checkbox>
-          <router-link to="/Register">注册</router-link>
         </div>
         <div class = "formButton">
           <el-form-item style = "width:100%;">

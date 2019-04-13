@@ -88,6 +88,7 @@ import GLOBAL from '../../common/xxx'
             if(res.success){
               that.username = res.user_nickname;
               sessionStorage.setItem("id",res.user_id)
+              sessionStorage.setItem("username",that.username)
             }else{
               that.$message({
                 showClose: true,
