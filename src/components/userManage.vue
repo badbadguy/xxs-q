@@ -18,36 +18,23 @@
 			      stripe
 			      style="width: 100%">
 			      <el-table-column
-			        prop="uid"
+			        prop="user_id"
 			        label="用户ID"
 			        width="180">
 			      </el-table-column>
 			      <el-table-column
-			        prop="uname"
+			        prop="user_name"
 			        label="用户名"
 			        width="220">
 			      </el-table-column>
-			      <el-table-column label="用户权限">
-				    <template slot-scope="scope">
-				      <el-switch
-					    style="display: block"
-					    v-model="tableData[scope.$index].status"
-					    @change="updateStatus(scope.row)"
-					    active-color="#13ce66"
-					    inactive-color="#ff4949"
-					    active-text="教师"
-					    inactive-text="学生">
-					  </el-switch>
-				    </template>
-				  </el-table-column>
 			      <el-table-column label="操作">
-				    <template slot-scope="scope">
-				      <el-button
-				        size="mini"
-				        type="danger"
-				        @click="handleDelete(scope.$index)">删除</el-button>
-				    </template>
-				  </el-table-column>
+              <template slot-scope="scope">
+                <el-button
+                  size="mini"
+                  type="success"
+                  @click="sureStudent(scope.$index)">通过</el-button>
+              </template>
+            </el-table-column>
 			    </el-table>
 			</div>
 			<div style="margin-top:30px;margin-left:auto;margin-right:auto;width:330px;">
@@ -64,7 +51,8 @@
 </template>
 
 <script>
-	import Title from './common/title.vue'
+  import Title from './common/title.vue'
+  import GLOBAL from '../common/xxx'
 	import $ from 'jquery'
 	export default{
 		data(){
@@ -245,41 +233,41 @@
       },
       getAllUser(){
         var postPage = new FormData()
-        postPage.append('page',this.pageNum)
-        postPage.append('rows',this.pageSize)
+        postPage.append('user_id',sessionStorage.id)
         var self = this
         $.ajax({
-          url:'http://47.106.213.157:8180/binyuantest-manager-web/user/all',
+          url:GLOBAL.baseURL+'/class/checkstudent',
           type:'post',
           xhrFields:{
-            withCredentials:true
+            withCredentials:false
           },
           data:postPage,
           contentType:false,
           processData:false,
           success:function(data){
-            console.log('查询成功5')
-            console.log(data.rows)
-            self.tableData = []
-            for(let i=0;i<data.rows.length;i++){
-              var info = data.rows[i]
-              if(info.status == 1){
-                self.tableData.push({
-                  uid:info.uid,
-                  uname:info.uname,
-                  status:'学生',
-                  state:true,
-                })
-              } else if(info.status == 0){
-                self.tableData.push({
-                  uid:info.uid,
-                  uname:info.uname,
-                  status:'教师',
-                  state:true,
-                })
-              }
-            }
-            self.pageCount = data.pageSize * 10
+            console.log("checkstudent",data)
+            self.tableData = data;
+            console.log("self.tableData",self.tableData);
+            // self.tableData = []
+            // for(let i=0;i<data.rows.length;i++){
+            //   var info = data.rows[i]
+            //   if(info.status == 1){
+            //     self.tableData.push({
+            //       uid:info.uid,
+            //       uname:info.uname,
+            //       status:'学生',
+            //       state:true,
+            //     })
+            //   } else if(info.status == 0){
+            //     self.tableData.push({
+            //       uid:info.uid,
+            //       uname:info.uname,
+            //       status:'教师',
+            //       state:true,
+            //     })
+            //   }
+            // }
+            // self.pageCount = data.pageSize * 10
           },
           error:function(){
             console.log("发生异常");

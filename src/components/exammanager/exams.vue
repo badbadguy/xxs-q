@@ -9,7 +9,13 @@
 				    </el-select>
 				    <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
 				</el-input> -->
-				<el-button type="primary" style="float:left;margin-left:80px" @click="add">新增题目</el-button>
+				<el-radio-group v-model="radio3">
+					<el-radio-button label="0">单选题</el-radio-button>
+					<el-radio-button label="1">语音题</el-radio-button>
+					<el-radio-button label="2">填空题</el-radio-button>
+					<el-radio-button label="3">应用题</el-radio-button>
+				</el-radio-group>
+				<el-button type="primary" style="margin-left:80px" @click="add">新增题目</el-button>
 			</div>
 			<div style="height:530px;">
 				<el-table
@@ -126,7 +132,8 @@
 				Qtitle:[],
 				defaultImg:'http://47.106.213.157:80/group1/M00/00/01/rBIH9lyx_TCAHTGxAAAGePDeGP0541.jpg',
 				imgVisible: false,
-				dialogImgUrl:''
+				dialogImgUrl:'',
+				radio3:''
 			}
 		},
 		methods:{
@@ -184,10 +191,39 @@
 				}
 			},
 			add(){
-				this.$router.push({
-					path: '/teacher/addExams',
-					replace: false
-				})
+				switch (this.radio3) {
+					case '0':
+						this.$router.push({
+							path: '/teacher/addExams',
+							replace: false
+						})
+						break;
+					case '1':
+						this.$router.push({
+							path: '/teacher/addExams1',
+							replace: false
+						})
+						break;
+					case '2':
+						this.$router.push({
+							path: '/teacher/addExams2',
+							replace: false
+						})
+						break;
+					case '3':
+						this.$router.push({
+							path: '/teacher/addExams3',
+							replace: false
+						})
+						break;
+					default:
+						this.$message({
+              showClose: true,
+              message: '未选择题目类型',
+              type: 'error'
+            });
+						break;
+				}
 			},
 			handleUpdate(id){
 				console.log(id)
@@ -223,37 +259,37 @@
 				}
 			},
 			handleDelete(id){
+				console.log("删除id：",id.question_id)
 				var postId = new FormData()
-				postId.append('eid',id.id)
+				postId.append('question_id',id.question_id)
 				var self = this
-        console.log(id.id)
-            	$.ajax({
-		            url:'http://47.106.213.157:8180/binyuantest-manager-web/exam/del',
-                    type:'post',
-                    xhrFields:{
-                        withCredentials:true
-                    },
-                    data:postId,
-                    contentType:false,
-                    processData:false,
-		            success:function(data){  
+        $.ajax({
+		      url:GLOBAL.baseURL+'/question/delete',
+          type:'post',
+          xhrFields:{
+              withCredentials:false
+          },
+          data:postId,
+          contentType:false,
+          processData:false,
+		      success:function(data){
 						console.log('删除成功')
 						self.getExamsList()
-						self.$message({
+						self.$message({                                         
 						  showClose: true,
-				          message: '删除成功！',
-				          type: 'success'
-				        });
-		            },  
-		            error:function(){  
-		                console.log("发生异常");  
-		                self.$message({
-				          showClose: true,
-				          message: '删除失败！',
-				          type: 'error'
-				        });
-		            }  
-		        }) 
+				      message: '删除成功！',
+				      type: 'success'
+				    });
+		      },
+		      error:function(){
+		        console.log("发生异常");
+		        self.$message({
+							showClose: true,
+							message: '删除失败！',
+							type: 'error'
+						});
+		      }
+		    })
 			},
 			handleCurrentChange(pageNum){
 				this.pageNum = pageNum
@@ -303,7 +339,6 @@
 				var that = this;
 				var postPage = new FormData()
 				postPage.append('subject_id',sessionStorage.getItem("teacher_subject"))
-				var self = this
         $.ajax({
 		      url:GLOBAL.baseURL+'/question/select',
           type:'post',
@@ -317,16 +352,16 @@
 						console.log('查询成功2',data)
 						that.Qtitle = data.resultList;
 						console.log('that.Qtitle',that.Qtitle);
-		      },  
+		      },
 		      error:function(){
-		        console.log("发生异常");  
-		        self.$message({
+		        console.log("发生异常");
+		        that.$message({
 							showClose: true,
 							message: '获取列表失败！',
 							type: 'error'
 						});
 		      }
-		    }) 
+		    })
 			},
 		},
     components:{

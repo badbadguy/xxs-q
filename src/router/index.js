@@ -7,6 +7,9 @@ import Login from "@/components/Login"
 import teacher from "@/components/Teacher"
 import exams from '../components/exammanager/exams.vue'
 import addExams from '../components/exammanager/addExams.vue'
+import addExams1 from '../components/exammanager/addExams1.vue'
+import addExams2 from '../components/exammanager/addExams2.vue'
+import addExams3 from '../components/exammanager/addExams3.vue'
 import updateExams from '../components/exammanager/updateExams.vue'
 import updateExams1 from '../components/exammanager/updateExams1.vue'
 import updateExams2 from '../components/exammanager/updateExams2.vue'
@@ -53,6 +56,21 @@ export default new Router({
           path: '/teacher/addExams',
           name: 'addExams',
           component: addExams
+        },
+        {
+          path: '/teacher/addExams1',
+          name: 'addExams1',
+          component: addExams1
+        },
+        {
+          path: '/teacher/addExams2',
+          name: 'addExams2',
+          component: addExams2
+        },
+        {
+          path: '/teacher/addExams3',
+          name: 'addExams3',
+          component: addExams3
         },
         {
           path: '/teacher/updateExams',

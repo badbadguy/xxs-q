@@ -17,7 +17,8 @@
 					list-type="picture-card"
 					action="''"
 					:http-request="upload"
-					:before-upload="beforeAvatarUpload">
+					:before-upload="beforeAvatarUpload"
+					:limit=1>
 					<i class="el-icon-plus"></i>
 				</el-upload>
         <div class="itemBar">
@@ -66,7 +67,8 @@
 	export default{
 		data(){
 			return{
-        estate:'1',
+				estate:'1',
+				eimg:'',
         eans1:'',
         eans2:'',
         eans3:'',
@@ -87,24 +89,30 @@
 			},
 			// 上传图片到OSS 同时派发一个事件给父组件监听
 			upload (item) {
-				console.log("upload",item);
-				// getAliOSSCreds().then(res => { // 向后台发请求 拉取OSS相关配置
-				// let creds = res.body.data
-				// let client = new OSS.Wrapper({
-				// 	region: 'oss-cn-beijing', // 服务器集群地区
-				// 	accessKeyId: creds.accessKeyId, // OSS帐号
-				// 	accessKeySecret: creds.accessKeySecret, // OSS 密码
-				// 	stsToken: creds.securityToken, // 签名token
-				// 	bucket: 'imgXXXX' // 阿里云上存储的 Bucket
-				// })
-				// let key = 'resource/' + localStorage.userId + '/images/' + createId() + '.jpg' // 存储路径，并且给图片改成唯一名字
-				// return client.put(key, item.file) // OSS上传
-				// }).then(res => {
-				// console.log(res.url)
-				// this.$emit('on-success', res.url) // 返回图片的存储路径
-				// }).catch(err => {
-				// console.log(err)
-				// })
+				var that = this;
+				var postPage = new FormData()
+				postPage.append('file',item.file)
+        $.ajax({
+		      url:GLOBAL.baseURL+'/question/picture',
+          type:'post',
+          xhrFields:{
+              withCredentials:false
+          },
+          data:postPage,
+          contentType:false,
+          processData:false,
+		      success:function(data){
+						that.eimg = data;
+		      },
+		      error:function(){
+		        console.log("发生异常");
+		        that.$message({
+							showClose: true,
+							message: '服务器连接失败',
+							type: 'error'
+						});
+		      }
+				})
 			},
 			back(){
 				this.$router.push({
@@ -121,14 +129,18 @@
         postExams.append('question_answer3',this.eans3)
         postExams.append('question_answer4',this.eans4)
         postExams.append('question_answerr',this.estate)
-        postExams.append('question_remark',this.eexp)
+				postExams.append('question_remark',this.eexp)
+				if(this.eimg != ''){
+					postExams.append('question_image',this.eimg)
+					console.log('post内容',postExams)
+				}
 
 				var self = this
         $.ajax({
           url:GLOBAL.baseURL+'/question/update',
           type:'post',
           xhrFields:{
-            withCredentials:true
+            withCredentials:false
           },
           data:postExams,
           contentType:false,

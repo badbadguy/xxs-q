@@ -13,6 +13,14 @@
 					<p>题目</p>
 					<el-input v-model="eques" placeholder="请输入题目" style="width:400px;"></el-input>
 				</div>
+				<el-upload
+					list-type="picture-card"
+					action="''"
+					:http-request="upload"
+					:before-upload="beforeAvatarUpload"
+					:limit=1>
+					<i class="el-icon-plus"></i>
+				</el-upload>
 				<div class="itemBar">
 					<p>答案A</p>
           <el-input v-model="eans1" placeholder="请输入答案的A选项" style="width:400px;"></el-input>
@@ -55,19 +63,57 @@
 
 <script>
 	import $ from 'jquery'
+	import GLOBAL from '../../common/xxx'	
 	export default{
 		data(){
 			return{
         estate:'1',
+        eques:'',
         eans1:'',
         eans2:'',
         eans3:'',
         eans4:'',
         eques:'',
 				eexp:'',
+				eimg:''
 			}
 		},
 		methods:{
+			// 图片上传前验证
+			beforeAvatarUpload (file) {
+				const isLt2M = file.size / 1024 / 1024 < 2
+				if (!isLt2M) {
+					this.$message.error('上传头像图片大小不能超过 2MB!')
+				}
+				return isLt2M
+			},
+			// 上传图片到OSS 同时派发一个事件给父组件监听
+			upload (item) {
+				var that = this;
+				var postPage = new FormData()
+				postPage.append('file',item.file)
+        $.ajax({
+		      url:GLOBAL.baseURL+'/question/picture',
+          type:'post',
+          xhrFields:{
+              withCredentials:false
+          },
+          data:postPage,
+          contentType:false,
+          processData:false,
+		      success:function(data){
+						that.eimg = data;
+		      },
+		      error:function(){
+		        console.log("发生异常");
+		        that.$message({
+							showClose: true,
+							message: '服务器连接失败',
+							type: 'error'
+						});
+		      }
+				})
+			},
 			back(){
 				this.$router.push({
 					path: '/teacher/exams',
@@ -76,37 +122,40 @@
 			},
 			confirm(){
 				var postExams = new FormData()
-				postExams.append('eexp',this.eexp)
-        postExams.append('eques',this.eques)
-        postExams.append('eans1',this.eans1)
-        postExams.append('eans2',this.eans2)
-        postExams.append('eans3',this.eans3)
-        postExams.append('eans4',this.eans4)
-        postExams.append('estate',this.estate)
+				postExams.append('question_remark',this.eexp)
+        postExams.append('question_title',this.eques)
+        postExams.append('question_image',this.eimg)
+        postExams.append('question_answer1',this.eans1)
+        postExams.append('question_answer2',this.eans2)
+        postExams.append('question_answer3',this.eans3)
+        postExams.append('question_answer4',this.eans4)
+        postExams.append('question_answerr',this.estate)
+        postExams.append('question_type','0')
+        postExams.append('subject_id',sessionStorage.teacher_subject)
 
 				var self = this
-            	$.ajax({
-		            url:'http://47.106.213.157:8180/binyuantest-manager-web/exam/add',
-                    type:'post',
-                    xhrFields:{
-                        withCredentials:true
-                    },
-                    data:postExams,
-                    contentType:false,
-                    processData:false,
-		            success:function(){
-						      console.log("新增成功");
-				      		self.back()
-		            },
-		            error:function(res){
-		                console.log("发生异常");
-		                self.$message({
-				          showClose: true,
-				          message: '新增失败！',
-				          type: 'error'
-				        });
-		            }
-		        })
+        $.ajax({
+		      url:GLOBAL.baseURL+'/question/add',
+          type:'post',
+          xhrFields:{
+              withCredentials:false
+          },
+          data:postExams,
+          contentType:false,
+          processData:false,
+		      success:function(){
+				    console.log("新增成功");
+						self.back()
+		      },
+		      error:function(res){
+		        console.log("发生异常");
+		        self.$message({
+							showClose: true,
+							message: '新增失败！',
+							type: 'error'
+						});
+		      }
+		    })
 			},
 		},
 		components:{

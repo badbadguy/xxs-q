@@ -10,35 +10,20 @@
 			</div>
 			<div style="margin-left:90px">
 				<div class="itemBar">
-					<p>题目1</p>
+					<p>题目</p>
 					<el-input v-model="eques" placeholder="请输入题目" style="width:400px;"></el-input>
 				</div>
+				<el-upload
+					list-type="picture-card"
+					action="''"
+					:http-request="upload"
+					:before-upload="beforeAvatarUpload"
+					:limit='1'>
+					<i class="el-icon-plus"></i>
+				</el-upload>
         <div class="itemBar">
-          <p>答案A</p>
-          <el-input v-model="eans1" placeholder="请输入答案的A选项" style="width:400px;"></el-input>
-        </div>
-        <div class="itemBar">
-          <p>答案B</p>
-          <el-input v-model="eans2" placeholder="请输入答案的B选项" style="width:400px;"></el-input>
-        </div>
-        <div class="itemBar">
-          <p>答案C</p>
-          <el-input v-model="eans3" placeholder="请输入答案的C选项" style="width:400px;"></el-input>
-        </div>
-        <div class="itemBar">
-          <p>答案D</p>
-          <el-input v-model="eans4" placeholder="请输入答案的D选项" style="width:400px;"></el-input>
-        </div>
-        <div>
-          <div class="itemBar">
-            <p>正确答案</p>
-          </div>
-          <el-radio-group v-model="estate">
-            <el-radio-button label="1">答案A</el-radio-button>
-            <el-radio-button label="2">答案B</el-radio-button>
-            <el-radio-button label="3">答案C</el-radio-button>
-            <el-radio-button label="4">答案D</el-radio-button>
-          </el-radio-group>
+          <p>正确答案</p>
+          <el-input v-model="eansr" placeholder="请输入正确答案" style="width:400px;"></el-input>
         </div>
         <div class="itemBar">
           <p>答案解析</p>
@@ -55,19 +40,54 @@
 
 <script>
 	import $ from 'jquery'
+	import GLOBAL from '../../common/xxx'
 	export default{
 		data(){
 			return{
-        estate:'1',
-        eans1:'',
-        eans2:'',
-        eans3:'',
-        eans4:'',
+				estate:'1',
+				eimg:'',
+        eansr:'',
         eques:'',
-        eexp:'',
+				eexp:'',
+				imageUrl:'',
 			}
 		},
 		methods:{
+			// 图片上传前验证
+			beforeAvatarUpload (file) {
+				const isLt2M = file.size / 1024 / 1024 < 2
+				if (!isLt2M) {
+				this.$message.error('上传头像图片大小不能超过 2MB!')
+				}
+				return isLt2M
+			},
+			// 上传图片到OSS 同时派发一个事件给父组件监听
+			upload (item) {
+				var that = this;
+				var postPage = new FormData()
+				postPage.append('file',item.file)
+        $.ajax({
+		      url:GLOBAL.baseURL+'/question/picture',
+          type:'post',
+          xhrFields:{
+              withCredentials:false
+          },
+          data:postPage,
+          contentType:false,
+          processData:false,
+		      success:function(data){
+						that.eimg = data;
+		      },
+		      error:function(){
+		        console.log("发生异常");
+		        that.$message({
+							showClose: true,
+							message: '服务器连接失败',
+							type: 'error'
+						});
+		      }
+				})
+			},
 			back(){
 				this.$router.push({
 					path: '/teacher/exams',
@@ -76,21 +96,21 @@
 			},
 			confirm(){
 				var postExams = new FormData()
-        postExams.append('eid',sessionStorage.examId)
-        postExams.append('eques',this.eques)
-        postExams.append('eans1',this.eans1)
-        postExams.append('eans2',this.eans2)
-        postExams.append('eans3',this.eans3)
-        postExams.append('eans4',this.eans4)
-        postExams.append('estate',this.estate)
-        postExams.append('eexp',this.eexp)
+        postExams.append('question_id',sessionStorage.question_id)
+        postExams.append('question_title',this.eques)
+        postExams.append('question_answers',this.eansr)
+				postExams.append('question_remark',this.eexp)
+				if(this.eimg != ''){
+					postExams.append('question_image',this.eimg)
+					console.log('post内容',postExams)
+				}
 
 				var self = this
         $.ajax({
-          url:'http://47.106.213.157:8180/binyuantest-manager-web/exam/upd',
+          url:GLOBAL.baseURL+'/question/update',
           type:'post',
           xhrFields:{
-            withCredentials:true
+            withCredentials:false
           },
           data:postExams,
           contentType:false,
@@ -112,40 +132,37 @@
 			},
 			getExamsInfo(){
 				var postId = new FormData()
-				postId.append('eId',sessionStorage.getItem("examId"))
+				postId.append('question_id',sessionStorage.getItem("question_id"))
 				var self = this
-	            $.ajax({
-			        url:'http://47.106.213.157:8180/binyuantest-manager-web/exam/id',
-	                type:'post',
-	                xhrFields:{
-	                    withCredentials:true
-	                },
-	                data:postId,
-	                contentType:false,
-	                processData:false,
-			        success:function(data){
-				        console.log('查询成功')
-				        console.log(data)
-                self.eques = data.eques
-                self.eans1 = data.eans1
-                self.eans2 = data.eans2
-                self.eans3 = data.eans3
-                self.eans4 = data.eans4
-                self.estate = data.estate
-                self.eexp = data.eexp
-			    	},
-			        error:function(){
-			            console.log("发生异常");
-			            self.$message({
-					        showClose: true,
-					        message: '获取失败！',
-					        type: 'error'
-					    });
-			        }
-			    })
+	      $.ajax({
+		    		url:GLOBAL.baseURL+'/question/select',
+	          type:'post',
+	          xhrFields:{
+	              withCredentials:false
+	          },
+	          data:postId,
+	          contentType:false,
+	          processData:false,
+						success:function(data){
+							console.log('查询成功')
+							console.log(data.resultList[0])
+							self.eques = data.resultList[0].question_title
+							self.eansr = data.resultList[0].question_answers
+							self.eexp = data.resultList[0].question_remark
+						},
+						error:function(){
+								console.log("发生异常");
+								self.$message({
+								showClose: true,
+								message: '获取失败！',
+								type: 'error'
+						});
+						}
+			  	})
 			},
 		},
 		mounted(){
+			console.log("qid:",sessionStorage.question_id)
       this.getExamsInfo()
 /*		  alert(sessionStorage.getItem("loginid"))*/
 		}
@@ -268,5 +285,28 @@
 #updateGoods .numFoot{
 	height: 50px;
 	padding: 10px 0 0 85px;
+}
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+}
+.avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
 }
 </style>

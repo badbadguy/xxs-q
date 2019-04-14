@@ -27,9 +27,9 @@
             <i class="el-icon-edit-outline"></i>
             <span slot="title">成绩查看</span>
           </el-menu-item>
-          <el-menu-item index="/teacher/userManage">
+          <el-menu-item index="/teacher/userManage" v-if="teacher_headClass">
             <i class="el-icon-setting"></i>
-            <span slot="title">用户管理</span>
+            <span slot="title">学生管理</span>
           </el-menu-item>
         </el-menu>
       </div>
@@ -48,6 +48,7 @@ import GLOBAL from '../common/xxx'
       return{
         defaultActive:'',
         username:'',
+        teacher_headClass:'',
       }
     },
     methods:{
@@ -73,6 +74,12 @@ import GLOBAL from '../common/xxx'
           contentType:false,
           processData:false,
           success:function(res){
+            console.log("selectAll返回",res.returnMap)
+            if(res.returnMap.teacher_ishead == 0){
+              sessionStorage.setItem("teacher_headClass",res.returnMap.teacher_headClass);
+              that.teacher_headClass = res.returnMap.teacher_headClass;
+              console.log("teacher_headClass",sessionStorage.teacher_headClass);
+            }
             sessionStorage.setItem("teacher_subject",res.returnMap.teacher_subject)
             console.log("查看返回",res.returnMap.teacher_subject)
             console.log("查看存储",sessionStorage.getItem("teacher_subject"))
@@ -115,11 +122,11 @@ import GLOBAL from '../common/xxx'
           contentType:false,
           processData:false,
           success:function(res){
-            console.log(res);
+            console.log("getLogin",res);
             if(res.success){
-              that.username = res.user_name;
+              that.username = res.user_nickname;
               sessionStorage.setItem("id",res.user_id)
-              sessionStorage.setItem("username",res.user_name)
+              sessionStorage.setItem("username",res.user_nickname)
             }else{
               that.$message({
                 showClose: true,
