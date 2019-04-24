@@ -48,7 +48,7 @@
 	export default{
 		data(){
 			return{
-				banner:'申请用户：',
+				banner:'申请学生：',
 				pageNum:1,
 				pageSize:8,
 				pageCount:80,
